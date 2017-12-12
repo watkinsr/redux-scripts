@@ -1,0 +1,89 @@
+#!/bin/sh
+
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+# echo '[SCRIPTS_DIR]:' $SCRIPTS_DIR
+PROJECT_DIR=$(dirname $(dirname $SCRIPTS_DIR)); # echo '[PROJECT_DIR]:' $PROJECT_DIR
+SCENE_DIR=$PROJECT_DIR/src/scenes/$1Scene
+VIEW_DIR=$PROJECT_DIR/src/views/$1View
+
+SCENE_VIEW=$1View
+SCENE_NAME=$1Scene
+
+function make_scene () {
+    SCENE_NAME=$1; # echo '[SCENE_NAME]: ' $SCENE_NAME;
+    SCENE_DIR=$2; # echo '[SCENE_DIR]: ' $SCENE_DIR;
+    SCENE_VIEW=$3; # echo '[SCENE_VIEW]: ' $SCENE_VIEW;
+    mkdir $SCENE_DIR; touch $SCENE_DIR/index.js; touch $SCENE_DIR/$SCENE_NAME.js;
+    echo "import React, { Component } from 'react'
+import ${SCENE_VIEW} from '../../views/${SCENE_VIEW}'
+import Scene from '../../components/Scene'
+
+class ${SCENE_NAME} extends Component {
+  render () {
+    return (
+      <Scene>
+        <${SCENE_VIEW} />
+      </Scene>
+    )
+  }
+}
+
+export default ${SCENE_NAME}" > $SCENE_DIR/$SCENE_NAME.js;
+
+    echo "import ${SCENE_NAME} from './${SCENE_NAME}'
+export default ${SCENE_NAME}" > $SCENE_DIR/index.js
+
+}
+
+function make_view () {
+    VIEW_DIR=$1; SCENE_VIEW=$2; VIEW_NAME=$3;
+    mkdir $VIEW_DIR; touch $VIEW_DIR/index.js; touch $VIEW_DIR/$SCENE_VIEW.js;
+    echo "import React, { Component } from 'react'
+import { Text } from 'react-native'
+import { Content } from 'native-base'
+
+class ${SCENE_VIEW} extends Component {
+  render () {
+    return (
+      <Content>
+        <Text>{'${SCENE_VIEW}'}</Text>
+      </Content>
+    )
+  }
+}
+
+export default ${SCENE_VIEW}" > $VIEW_DIR/$SCENE_VIEW.js
+
+    echo "import ${VIEW_NAME}View from './${VIEW_NAME}View'
+import { connect } from 'react-redux'
+import { fetch${VIEW_NAME} } from '../../store/modules/${VIEW_NAME}/actions'
+import { dataSelector, fetching${VIEW_NAME}Predicate, ${VIEW_NAME}Predicate } from './selectors'
+
+const mapStateToProps = state => ({ state })
+const mapDispatchToProps = dispatch => ({ dispatch })
+const mergeProps = ({ state }, { dispatch }, ownProps) => {
+  return {
+    fetch${VIEW_NAME}: () => dispatch(fetch${VIEW_NAME}()),
+    fetchingPredicate: fetching${VIEW_NAME}Predicate(state),
+    ${VIEW_NAME}Predicate: ${VIEW_NAME}Predicate(state),
+    data: dataSelector(state)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(${VIEW_NAME}View)
+" > $VIEW_DIR/index.js
+
+
+    echo "const _${VIEW_NAME} = state => state.get('${VIEW_NAME}')
+export const dataSelector = state => _${VIEW_NAME}(state).data
+export const fetching${VIEW_NAME}Predicate = state => _${VIEW_NAME}(state).loading
+export const ${VIEW_NAME}Predicate = state => _${VIEW_NAME}(state).data.size > 0 && !fetching${VIEW_NAME}Predicate(state)
+" > $VIEW_DIR/selectors.js
+
+
+}
+
+VIEW_NAME=$1
+make_scene $SCENE_NAME $SCENE_DIR $SCENE_VIEW
+make_view $VIEW_DIR $SCENE_VIEW $VIEW_NAME
+echo "[DONE]"

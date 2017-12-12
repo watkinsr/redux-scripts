@@ -1,0 +1,113 @@
+#!/bin/sh
+
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+PROJECT_DIR=$(dirname $(dirname $SCRIPTS_DIR));
+MODULE_DIR=$PROJECT_DIR/src/store/modules/$1
+
+function make_module () {
+    MODULE_DIR=$1;
+    MODULE_NAME=$2
+    mkdir $MODULE_DIR; touch $MODULE_DIR/actions.js; touch $MODULE_DIR/actionTypes.js; touch $MODULE_DIR/reducers.js;
+    touch $MODULE_DIR/models.js; touch $MODULE_DIR/index.js; touch $MODULE_DIR/middleware.js;
+    echo "import * as actionTypes from './actionTypes'
+import ${MODULE_NAME}Service from '../../../services/${MODULE_NAME}'
+
+export const fetch${MODULE_NAME} = (args) => dispatch => {
+  dispatch(fetchBegin())
+  return ${MODULE_NAME}Service
+  .fetch({args})
+    .then(res => {
+      dispatch(fetchSuccess({res}))
+    })
+    .catch(error => {
+      dispatch(fetchError({ error }))
+      return Promise.reject(error)
+    })
+}
+const fetchBegin = () => ({type: actionTypes.FETCH_${MODULE_NAME}_BEGIN})
+const fetchSuccess = ({res = {}}) => ({
+  type: actionTypes.FETCH_SUCCESS,
+  payload: res
+})
+const fetchError = ({ error }) => ({
+  type: actionTypes.FETCH_ERROR,
+  payload: error
+})
+" > $MODULE_DIR/actions.js;
+
+    echo "export const FETCH_${MODULE_NAME}_BEGIN = 'FETCH_${MODULE_NAME}_BEGIN'
+export const FETCH_${MODULE_NAME}_SUCCESS = 'FETCH_${MODULE_NAME}_SUCCESS'
+export const FETCH_${MODULE_NAME}_ERROR = 'FETCH_${MODULE_NAME}_ERROR' " > $MODULE_DIR/actionTypes.js;
+
+    echo "import * as actionTypes from './actionTypes'
+import ${MODULE_NAME}Reducers from './reducers'
+import { ${MODULE_NAME}Model } from './models'
+
+const REDUCERS = Object.freeze({
+  [actionTypes.FETCH_${MODULE_NAME}_BEGIN]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME}Begin,
+  [actionTypes.FETCH_${MODULE_NAME}_SUCCESS]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME}Success,
+  [actionTypes.FETCH_${MODULE_NAME}_ERROR]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME}Error
+})
+
+export default function registerReducer (state = new ${MODULE_NAME}Model(), action) {
+  const handler = REDUCERS[action.type]
+  return handler ? handler(state, action) : state
+}
+ " > $MODULE_DIR/index.js
+    echo "import { List } from 'immutable'
+
+export class ${MODULE_NAME}Reducers {
+  fetch${MODULE_NAME}Begin (state) {
+    return state.merge({ loading: true })
+  }
+  fetch${MODULE_NAME}Success (state, { payload }) {
+    return state.merge({
+      loading: false,
+      data: List(payload)
+    })
+  }
+  fetch${MODULE_NAME}Error (state) {
+    return state.merge({ loading: false })
+  }
+}
+
+export default new ${MODULE_NAME}Reducers()
+ " > $MODULE_DIR/reducers.js
+
+    echo "import { List, Record } from 'immutable'
+
+export const ${MODULE_NAME}DataModel = Record({
+  data: new List()
+})
+
+export const ${MODULE_NAME}Model = Record({
+  data: new ${MODULE_NAME}DataModel(),
+  loading: false
+})
+ " > $MODULE_DIR/models.js
+
+    echo "import * as actions from './actions'
+import { Actions } from 'react-native-router-flux'
+
+const ${MODULE_NAME}Predicate = ({ ${MODULE_NAME} }) => {}
+const fetch${MODULE_NAME}Predicate = ({ ${MODULE_NAME} }) => Actions.currentScene === 'profile' && profilePredicate(profile)
+
+class ${MODULE_NAME}Middleware {
+  fetch${MODULE_NAME}OnNavTo{MODULE_NAME} ({ dispatch, getState }) {
+    return next => action => {
+      const { ${MODULE_NAME} } = getState()
+      next(action)
+      if (Actions.currentScene === '${MODULE_NAME}' && fetch${MODULE_NAME}Predicate(profile)) {
+        dispatch(actions.fetch${MODULE_NAME}())
+      }
+    }
+  }
+}
+
+export default new ${MODULE_NAME}Middleware()
+" > $MODULE_DIR/middleware.js
+}
+
+MODULE_NAME=$1
+make_module $MODULE_DIR $MODULE_NAME
+echo "[DONE]"

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+COMPONENT_NAME=$1
+
+function create_component () {
+  COMPONENT_NAME=$1
+  echo $COMPONENT_NAME
+  cd ../;
+  cd module-creator; ./module-creator $COMPONENT_NAME; cd ../;
+  cd service-creator; ./service-creator $COMPONENT_NAME; cd ../;
+  cd scene-creator; ./scene-creator $COMPONENT_NAME; cd ../;
+}
+
+create_component $COMPONENT_NAME
