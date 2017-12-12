@@ -1,9 +1,5 @@
 #!/bin/sh
 
-SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-PROJECT_DIR=$(dirname $(dirname $SCRIPTS_DIR));
-MODULE_DIR=$PROJECT_DIR/src/store/modules/$1
-
 function make_module () {
     MODULE_DIR=$1;
     MODULE_NAME=$2
@@ -109,5 +105,8 @@ export default new ${MODULE_NAME}Middleware()
 }
 
 MODULE_NAME=$1
+PROJECT_DIR=$2;
+MODULE_DIR=$PROJECT_DIR/src/store/modules/$1
+
 make_module $MODULE_DIR $MODULE_NAME
 echo "[DONE]"
