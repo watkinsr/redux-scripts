@@ -1,14 +1,5 @@
 #!/bin/sh
 
-SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-# echo '[SCRIPTS_DIR]:' $SCRIPTS_DIR
-PROJECT_DIR=$(dirname $(dirname $SCRIPTS_DIR)); # echo '[PROJECT_DIR]:' $PROJECT_DIR
-SCENE_DIR=$PROJECT_DIR/src/scenes/$1Scene
-VIEW_DIR=$PROJECT_DIR/src/views/$1View
-
-SCENE_VIEW=$1View
-SCENE_NAME=$1Scene
-
 function make_scene () {
     SCENE_NAME=$1; # echo '[SCENE_NAME]: ' $SCENE_NAME;
     SCENE_DIR=$2; # echo '[SCENE_DIR]: ' $SCENE_DIR;
@@ -84,6 +75,12 @@ export const ${VIEW_NAME}Predicate = state => _${VIEW_NAME}(state).data.size > 0
 }
 
 VIEW_NAME=$1
+PROJECT_DIR=$2
+SCENE_DIR=$PROJECT_DIR/src/scenes/$1Scene
+VIEW_DIR=$PROJECT_DIR/src/views/$1View
+SCENE_VIEW=$1View
+SCENE_NAME=$1Scene
+
 make_scene $SCENE_NAME $SCENE_DIR $SCENE_VIEW
 make_view $VIEW_DIR $SCENE_VIEW $VIEW_NAME
 echo "[DONE]"
