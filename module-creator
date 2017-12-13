@@ -10,7 +10,7 @@ function make_module () {
     echo "import * as actionTypes from './actionTypes'
 import ${MODULE_NAME}Service from '../../../services/${MODULE_NAME}'
 
-export const fetch${MODULE_NAME} = (args) => dispatch => {
+export const fetch${MODULE_NAME_CAP} = (args) => dispatch => {
   dispatch(fetchBegin())
   return ${MODULE_NAME}Service
   .${MODULE_NAME}Get({args})
