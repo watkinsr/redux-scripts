@@ -3,6 +3,8 @@
 function make_module () {
     MODULE_DIR=$1;
     MODULE_NAME=$2
+    MODULE_NAME_UPPER="$(echo $MODULE_NAME | tr /a-z/ /A-Z/)"
+    MODULE_NAME_CAP="$(tr '[:lower:]' '[:upper:]' <<< ${MODULE_NAME:0:1})${MODULE_NAME:1}"
     mkdir $MODULE_DIR; touch $MODULE_DIR/actions.js; touch $MODULE_DIR/actionTypes.js; touch $MODULE_DIR/reducers.js;
     touch $MODULE_DIR/models.js; touch $MODULE_DIR/index.js; touch $MODULE_DIR/middleware.js;
     echo "import * as actionTypes from './actionTypes'
@@ -16,53 +18,54 @@ export const fetch${MODULE_NAME} = (args) => dispatch => {
       dispatch(fetchSuccess({res}))
     })
     .catch(error => {
+      debugger
       dispatch(fetchError({ error }))
       return Promise.reject(error)
     })
 }
-const fetchBegin = () => ({type: actionTypes.FETCH_${MODULE_NAME}_BEGIN})
+const fetchBegin = () => ({type: actionTypes.FETCH_${MODULE_NAME_UPPER}_BEGIN})
 const fetchSuccess = ({res = {}}) => ({
-  type: actionTypes.FETCH_SUCCESS,
+  type: actionTypes.FETCH_${MODULE_NAME_UPPER}_SUCCESS,
   payload: res
 })
 const fetchError = ({ error }) => ({
-  type: actionTypes.FETCH_ERROR,
+  type: actionTypes.FETCH_${MODULE_NAME_UPPER}_ERROR,
   payload: error
 })
 " > $MODULE_DIR/actions.js;
 
-    echo "export const FETCH_${MODULE_NAME}_BEGIN = 'FETCH_${MODULE_NAME}_BEGIN'
-export const FETCH_${MODULE_NAME}_SUCCESS = 'FETCH_${MODULE_NAME}_SUCCESS'
-export const FETCH_${MODULE_NAME}_ERROR = 'FETCH_${MODULE_NAME}_ERROR' " > $MODULE_DIR/actionTypes.js;
+    echo "export const FETCH_${MODULE_NAME_UPPER}_BEGIN = 'FETCH_${MODULE_NAME_UPPER}_BEGIN'
+export const FETCH_${MODULE_NAME_UPPER}_SUCCESS = 'FETCH_${MODULE_NAME_UPPER}_SUCCESS'
+export const FETCH_${MODULE_NAME_UPPER}_ERROR = 'FETCH_${MODULE_NAME_UPPER}_ERROR'" > $MODULE_DIR/actionTypes.js;
 
     echo "import * as actionTypes from './actionTypes'
 import ${MODULE_NAME}Reducers from './reducers'
 import { ${MODULE_NAME}Model } from './models'
 
 const REDUCERS = Object.freeze({
-  [actionTypes.FETCH_${MODULE_NAME}_BEGIN]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME}Begin,
-  [actionTypes.FETCH_${MODULE_NAME}_SUCCESS]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME}Success,
-  [actionTypes.FETCH_${MODULE_NAME}_ERROR]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME}Error
+  [actionTypes.FETCH_${MODULE_NAME_UPPER}_BEGIN]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME_CAP}Begin,
+  [actionTypes.FETCH_${MODULE_NAME_UPPER}_SUCCESS]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME_CAP}Success,
+  [actionTypes.FETCH_${MODULE_NAME_UPPER}_ERROR]: ${MODULE_NAME}Reducers.fetch${MODULE_NAME_CAP}Error
 })
 
-export default function registerReducer (state = new ${MODULE_NAME}Model(), action) {
+export default function registerReducer (state = new ${MODULE_NAME_CAP}Model(), action) {
   const handler = REDUCERS[action.type]
   return handler ? handler(state, action) : state
 }
  " > $MODULE_DIR/index.js
     echo "import { List } from 'immutable'
 
-export class ${MODULE_NAME}Reducers {
-  fetch${MODULE_NAME}Begin (state) {
+export class ${MODULE_NAME_CAP}Reducers {
+  fetch${MODULE_NAME_CAP}Begin (state) {
     return state.merge({ loading: true })
   }
-  fetch${MODULE_NAME}Success (state, { payload }) {
+  fetch${MODULE_NAME_CAP}Success (state, { payload }) {
     return state.merge({
       loading: false,
       data: List(payload)
     })
   }
-  fetch${MODULE_NAME}Error (state) {
+  fetch${MODULE_NAME_CAP}Error (state) {
     return state.merge({ loading: false })
   }
 }

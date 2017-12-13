@@ -4,7 +4,7 @@ function make_service () {
     SERVICE_DIR=$1;
     SERVICE_NAME=$2
     touch $SERVICE_DIR/$SERVICE_NAME.js;
-    endpointGet='`${env.BASE_URL}/'"${SERVICE_NAME}"'${params}`'
+    endpointGet='`${env.BASE_URL}/'"${SERVICE_NAME}"'?${params}`'
     endpoint='`${env.BASE_URL}/'"${SERVICE_NAME}"'`'
     echo "import { ApiUtils, constants } from '../utils/api'
 import env from '../env'
@@ -15,7 +15,12 @@ const encodeData = data => Object.keys(data).map(key => [key, data[key]].map(enc
 
 export class ${SERVICE_NAME}Service {
   ${SERVICE_NAME}Get ({ body = {} }) {
-    return ApiUtils.get({endpoint, headers: {ref: env.partner})
+    let newEndpoint = endpointParams(
+      encodeData({
+        reference: env.partner
+      })
+    )
+    return ApiUtils.get({endpoint: newEndpoint, headers: {ref: env.partner}})
   }
   ${SERVICE_NAME}Post ({ body = {} }) {
     return ApiUtils.post({endpoint, headers: {ref: env.partner, ct: constants.json}, body})
