@@ -11,7 +11,7 @@ import ${MODULE_NAME}Service from '../../../services/${MODULE_NAME}'
 export const fetch${MODULE_NAME} = (args) => dispatch => {
   dispatch(fetchBegin())
   return ${MODULE_NAME}Service
-  .${MODULE_NAME)Get}({args})
+  .${MODULE_NAME}Get({args})
     .then(res => {
       dispatch(fetchSuccess({res}))
     })
