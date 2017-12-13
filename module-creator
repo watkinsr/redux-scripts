@@ -20,7 +20,7 @@ export const fetch${MODULE_NAME} = (args) => dispatch => {
       return Promise.reject(error)
     })
 }
-const fetchBegin = () => ({type: actionTypes.FETCH_${MODULE_NAME^^}_BEGIN})
+const fetchBegin = () => ({type: actionTypes.FETCH_${MODULE_NAME}_BEGIN})
 const fetchSuccess = ({res = {}}) => ({
   type: actionTypes.FETCH_SUCCESS,
   payload: res
@@ -31,9 +31,9 @@ const fetchError = ({ error }) => ({
 })
 " > $MODULE_DIR/actions.js;
 
-    echo "export const FETCH_${MODULE_NAME^^}_BEGIN = 'FETCH_${MODULE_NAME^^}_BEGIN'
-export const FETCH_${MODULE_NAME^^}_SUCCESS = 'FETCH_${MODULE_NAME^^}_SUCCESS'
-export const FETCH_${MODULE_NAME^^}_ERROR = 'FETCH_${MODULE_NAME^^}_ERROR' " > $MODULE_DIR/actionTypes.js;
+    echo "export const FETCH_${MODULE_NAME}_BEGIN = 'FETCH_${MODULE_NAME}_BEGIN'
+export const FETCH_${MODULE_NAME}_SUCCESS = 'FETCH_${MODULE_NAME}_SUCCESS'
+export const FETCH_${MODULE_NAME}_ERROR = 'FETCH_${MODULE_NAME}_ERROR' " > $MODULE_DIR/actionTypes.js;
 
     echo "import * as actionTypes from './actionTypes'
 import ${MODULE_NAME}Reducers from './reducers'
